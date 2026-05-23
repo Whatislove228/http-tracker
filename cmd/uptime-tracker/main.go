@@ -16,6 +16,13 @@ type Result struct {
 	Error      error
 }
 
+const (
+	colorReset = "\033[0m"
+	colorRed   = "\033[31m"
+	colorGreen = "\033[32m"
+	colorBold  = "\033[1m"
+)
+
 func main() {
 	if len(os.Args) < 2 {
 		fmt.Println("Usage: uptime-checker <sites-file>")
@@ -38,7 +45,7 @@ func main() {
 		}(url)
 	}
 
-	fmt.Printf("%-30s %-5s %-8s %s\n", "URL", "STATE", "CODE", "DETAIL")
+	fmt.Printf(colorBold+"%-30s %-5s %-8s %s\n"+colorReset, "URL", "STATE", "CODE", "DETAIL")
 	fmt.Println(strings.Repeat("-", 70))
 
 	for range sites {
@@ -49,13 +56,25 @@ func main() {
 	}
 }
 
+func coloredStatus(status string) string {
+	if status == "UP" {
+		return colorGreen + status + colorReset
+	}
+
+	if status == "DOWN" {
+		return colorRed + status + colorReset
+	}
+
+	return status
+}
+
 func printResult(result Result) {
 	if result.Error != nil {
-		fmt.Printf("%-30s %-5s %-8s %v\n", result.URL, result.Status, "-", result.Error)
+		fmt.Printf("%-30s %-14s %-8s %v\n", result.URL, coloredStatus(result.Status), "-", result.Error)
 		return
 	}
 
-	fmt.Printf("%-30s %-5s %-8d %v\n", result.URL, result.Status, result.StatusCode, result.Duration)
+	fmt.Printf("%-30s %-14s %-8d %v\n", result.URL, coloredStatus(result.Status), result.StatusCode, result.Duration)
 }
 
 func readSites(file string) ([]string, error) {
